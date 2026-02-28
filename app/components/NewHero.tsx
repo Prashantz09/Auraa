@@ -631,6 +631,7 @@ function PhoneMockup() {
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [message, setMessage] = useState("");
   const [sentMessages, setSentMessages] = useState<string[]>([]);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleMsg1Done = () => {
     setTimeout(() => setShowTyping(true), 300);
@@ -640,6 +641,29 @@ function PhoneMockup() {
     }, 2000);
   };
   const handleMsg2Done = () => setTimeout(() => setShowImages(true), 400);
+
+  // Ensure video plays when shown
+  useEffect(() => {
+    if (showImages && videoRef.current) {
+      const video = videoRef.current;
+      // Try to play video (browser may block autoplay)
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.log("Autoplay prevented, adding user interaction fallback");
+          // Add click listener to start video on first interaction
+          const startVideoOnInteraction = () => {
+            video.play().catch((e) => console.error("Video play failed:", e));
+            document.removeEventListener("click", startVideoOnInteraction);
+          };
+          document.addEventListener("click", startVideoOnInteraction, {
+            once: true,
+          });
+        });
+      }
+    }
+  }, [showImages]);
+
   useEffect(() => {
     if (showImages) {
       const t = setTimeout(() => setShowKeyboard(true), 600);
@@ -722,16 +746,31 @@ function PhoneMockup() {
             <AnimatePresence>
               {showImages && (
                 <motion.video
+                  ref={videoRef}
+                  key="hero-video"
                   src={VIDEO_URL}
                   autoPlay
                   muted
                   loop
                   playsInline
-                  controls
+                  controls={false}
+                  preload="auto"
                   style={{
                     borderRadius: 14,
                     width: "100%",
                     aspectRatio: "16/9",
+                    objectFit: "cover",
+                  }}
+                  onError={(e) => {
+                    console.error("Video failed to load:", e);
+                    // Fallback: try to reload video
+                    const video = e.target as HTMLVideoElement;
+                    setTimeout(() => {
+                      video.load();
+                    }, 1000);
+                  }}
+                  onLoadedData={() => {
+                    console.log("Video loaded successfully");
                   }}
                 />
               )}

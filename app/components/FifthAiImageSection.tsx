@@ -148,7 +148,7 @@ const FifthAiImageSection = () => {
 
               <div className="relative z-10">
                 <video
-                  src="/review_person_images/Howto.mp4"
+                  src="https://res.cloudinary.com/dwpp9kkp3/video/upload/v1772271261/Howto_tclofw.mp4"
                   controls
                   className="w-full rounded-lg sm:rounded-xl lg:rounded-2xl border border-white/10"
                 />

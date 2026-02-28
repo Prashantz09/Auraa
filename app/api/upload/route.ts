@@ -59,9 +59,23 @@ export async function POST(req: Request) {
     // Upload thumbnail to ImageKit
     // -----------------------------
     const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
+
+    // Sanitize filename for ImageKit: remove invalid chars and ensure doesn't start with digit
+    const sanitizeFileName = (name: string) => {
+      // Remove invalid characters, keep only letters, digits, and underscores
+      let sanitized = name.replace(/[^a-zA-Z0-9_]/g, "_");
+
+      // Ensure doesn't start with a digit
+      if (/^\d/.test(sanitized)) {
+        sanitized = "file_" + sanitized;
+      }
+
+      return sanitized;
+    };
+
     const imageUpload = await imagekit.upload({
       file: imageBuffer,
-      fileName: imageFile.name,
+      fileName: sanitizeFileName(imageFile.name),
       folder: "/thumbnails",
     });
 

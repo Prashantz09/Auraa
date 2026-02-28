@@ -619,7 +619,8 @@ function ChatBubble({
   );
 }
 
-const VIDEO_URL = "open.mp4";
+const VIDEO_URL =
+  "https://res.cloudinary.com/dwpp9kkp3/video/upload/v1772296079/Open_gasmit.mp4";
 const MSG1 = "Hey Auraa! Can you pull up my latest video project?";
 const MSG2 = "Of course! Here's your recent video edit ready for review.";
 

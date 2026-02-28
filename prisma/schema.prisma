@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+ 
+}
+
+
+model Video {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String  
+  tags        String[] 
+  videoUrl    String  
+  imageUrl    String  
+  type        String   @default("horizontal")
+  createdAt   DateTime @default(now())
+}
+
+model Appointment {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  service   String
+  date      String   // "YYYY-MM-DD"
+  time      String   // "HH:MM" 24-hr
+  message   String   @default("")
+  createdAt DateTime @default(now())
+
+  @@unique([date, time]) // prevents double-booking at DB level
+}

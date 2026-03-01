@@ -223,13 +223,13 @@ export const TESTIMONIALS = [
     rating: 5,
   },
   {
-    image: "/review_person_images/jivraj.png",
+    image: "/review_person_images/Jivraj.png",
     name: "Jivraj Singh Sachar",
     review: "Crazy output love it!!!",
     rating: 5,
   },
   {
-    image: "/review_person_images/NIK.png",
+    image: "/review_person_images/NIk.png",
     name: "Nik Dhimal",
     review: "Great!!",
     rating: 4,

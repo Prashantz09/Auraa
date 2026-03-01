@@ -219,7 +219,7 @@ export const TESTIMONIALS = [
   {
     image: "/review_person_images/Rohan.png",
     name: "Rohan Dhawan",
-    review: "Intro was 🔥🔥",
+    review: "Intro was ",
     rating: 5,
   },
   {

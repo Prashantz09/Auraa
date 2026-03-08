@@ -38,15 +38,21 @@ nav {
 }
 
 /* Universal constraint - nothing should exceed viewport */
-* {
-  max-width: 100vw;
-}
-
 img,
-video,
-svg {
+svg,
+video {
   max-width: 100%;
   height: auto;
+}
+
+/* Hide scrollbar for clean scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* Custom scrollbar hide */
@@ -131,6 +137,20 @@ svg {
 
 .animate-scroll-reverse {
   animation: scroll-reverse var(--animation-duration, 40s) linear infinite;
+}
+
+/* Scrolls up (vertical) */
+@keyframes scroll-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.animate-scroll-vertical {
+  animation: scroll-vertical var(--animation-duration, 40s) linear infinite;
 }
 
 @theme inline {

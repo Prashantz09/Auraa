@@ -4,7 +4,6 @@ import { prisma } from "../../lib/prisma";
 import { Prisma } from "@/generated/prisma/client";
 import { sendAdminNotification, sendUserConfirmation } from "@/app/lib/emails";
 
-
 const VALID_SLOTS = [
   "09:00",
   "09:30",
@@ -24,13 +23,14 @@ const VALID_SLOTS = [
   "17:30",
 ];
 
-const VALID_SERVICES = [
-  "Brand Strategy Session",
-  "UI/UX Design Consultation",
-  "Full Website Audit",
-  "Growth Marketing Call",
-  "1-on-1 Coaching",
-];
+const SERVICE_MAP = {
+  "Horizontal Video": "Horizontal Video Editing",
+  "Vertical / Shorts": "Short-form Content Editing",
+  "Podcast Production": "Podcast Production",
+  "Thumbnail Design": "Thumbnail Design",
+};
+
+const VALID_SERVICES = Object.values(SERVICE_MAP);
 
 // ── GET — fetch booked time slots for a date ──────────────────────────────────
 export async function GET(req: NextRequest) {

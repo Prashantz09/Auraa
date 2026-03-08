@@ -38,23 +38,33 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   };
 
   return (
-    <div>
+    <div
+      className={`w-full mx-auto sm:max-w-none ${
+        isVertical
+          ? "max-w-[280px] sm:max-w-xs md:max-w-sm h-[320px] sm:h-auto"
+          : ""
+      }`}
+    >
       <GlassCard
         className={`group cursor-pointer ${
-          isVertical ? "p-4" : "p-6"
+          isVertical
+            ? "p-3 sm:p-4 h-full sm:h-auto flex flex-col"
+            : "p-3 sm:p-4 lg:p-6"
         } rounded-xl relative overflow-hidden`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onClick={onClick}
       >
-        <div className="flex justify-between items-center mb-4">
-          <span className="font-mono text-xs text-white/40">0{project.id}</span>
+        <div className="flex justify-between items-center mb-2 sm:mb-4">
+          <span className="font-mono text-[10px] sm:text-xs text-white/40">
+            0{project.id}
+          </span>
         </div>
 
         <div
           className={`w-full ${
-            isVertical ? "aspect-[9/16]" : "aspect-video"
-          } rounded-lg overflow-hidden relative mb-4 bg-gray-800`}
+            isVertical ? "aspect-[2/3]" : "aspect-video"
+          } rounded-lg overflow-hidden relative mb-2 sm:mb-4 bg-gray-800`}
         >
           <Image
             src={project.image}
@@ -85,14 +95,18 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
 
         <h4
           className={`${
-            isVertical ? "text-sm text-center" : "text-lg"
+            isVertical
+              ? "text-xs sm:text-sm text-center flex-1 line-clamp-2 overflow-hidden"
+              : "text-sm sm:text-base lg:text-lg"
           } font-light tracking-wide group-hover:text-cyan-100 transition-colors`}
         >
           {project.title}
         </h4>
 
         {!isVertical && project.description && (
-          <p className="text-white/50 text-sm mt-2">{project.description}</p>
+          <p className="text-white/50 text-xs sm:text-sm mt-1 sm:mt-2 line-clamp-2">
+            {project.description}
+          </p>
         )}
       </GlassCard>
     </div>

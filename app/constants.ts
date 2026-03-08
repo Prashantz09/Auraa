@@ -80,7 +80,7 @@ export const PROJECTS: Project[] = [
     description: "Next-gen ion thruster UI interfaces.",
     video:
       "https://res.cloudinary.com/dwpp9kkp3/video/upload/v1772270618/Kyle_Craichy_hgxe47.mp4",
-    image: "/th5.jpg",
+    image: "/Okayy.jpg",
     format: "vertical",
   },
   {

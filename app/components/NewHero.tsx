@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
@@ -335,199 +336,55 @@ function InputBar({
 function useTypewriter(text: string, speed = 22, enabled = false) {
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
+  const completedRef = useRef(false);
+  const startedRef = useRef(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
-    if (!enabled) {
-      setDisplayed("");
-      setDone(false);
-      return;
-    }
+    if (completedRef.current) return;
+    if (!enabled) return;
+    if (startedRef.current) return;
+
+    startedRef.current = true;
     setDisplayed("");
     setDone(false);
     let i = 0;
-    const iv = setInterval(() => {
+
+    intervalRef.current = setInterval(() => {
       i++;
       setDisplayed(text.slice(0, i));
       if (i >= text.length) {
-        clearInterval(iv);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+        completedRef.current = true;
         setDone(true);
       }
     }, speed);
-    return () => clearInterval(iv);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, [text, speed, enabled]);
+
+  if (completedRef.current) {
+    return { displayed: text, done: true };
+  }
+
   return { displayed, done };
-}
-
-function BallpenHighlight({
-  children,
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-}) {
-  const pathD =
-    "M 4,4 C 30,2 65,5 96,3 C 98,3 99,4 99,16 C 99,17 98,18 96,19 C 70,21 35,18 4,20 C 2,20 1,18 2,16 C 1,12 1,8 4,4 Z";
-  return (
-    <span
-      style={{ position: "relative", display: "inline", whiteSpace: "nowrap" }}
-    >
-      <motion.svg
-        aria-hidden="true"
-        initial="hidden"
-        animate="visible"
-        style={{
-          position: "absolute",
-          top: "-8px",
-          left: "-8px",
-          width: "calc(100% + 16px)",
-          height: "calc(100% + 16px)",
-          overflow: "visible",
-          zIndex: 0,
-          pointerEvents: "none",
-        }}
-        viewBox="0 0 100 24"
-        preserveAspectRatio="none"
-      >
-        <motion.path
-          d={pathD}
-          fill="rgba(22,13,203,0.18)"
-          stroke="#2079d797"
-          strokeWidth="1.1"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeDasharray="240"
-          variants={{
-            hidden: { strokeDashoffset: 240, opacity: 0 },
-            visible: {
-              strokeDashoffset: 0,
-              opacity: 1,
-              transition: {
-                strokeDashoffset: {
-                  duration: 0.7,
-                  delay,
-                  ease: [0.4, 0, 0.15, 1],
-                },
-                opacity: { duration: 0.01, delay },
-              },
-            },
-          }}
-        />
-        <motion.path
-          d="M 5,6 C 35,4 68,6 95,5 C 97,5 98,6 98,7"
-          fill="none"
-          stroke="rgba(16,13,175,0.35)"
-          strokeWidth="0.6"
-          strokeLinecap="round"
-          variants={{
-            hidden: { pathLength: 0 },
-            visible: {
-              pathLength: 1,
-              transition: {
-                duration: 0.45,
-                delay: delay + 0.3,
-                ease: [0.4, 0, 0.2, 1],
-              },
-            },
-          }}
-        />
-      </motion.svg>
-      <span style={{ position: "relative", zIndex: 1 }}>{children}</span>
-    </span>
-  );
-}
-
-function BallpenUnderline({
-  children,
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-}) {
-  return (
-    <span style={{ position: "relative", display: "inline" }}>
-      {children}
-      <span
-        style={{
-          position: "absolute",
-          left: "-2px",
-          bottom: "-10px",
-          width: "calc(100% + 4px)",
-          height: 14,
-          overflow: "visible",
-          pointerEvents: "none",
-        }}
-      >
-        <motion.svg
-          aria-hidden="true"
-          initial="hidden"
-          animate="visible"
-          style={{ width: "100%", height: "100%" }}
-          viewBox="0 0 100 14"
-          preserveAspectRatio="none"
-        >
-          <motion.path
-            d="M 0,4.5 C 18,4.2 38,4.8 58,4.4 C 78,4.0 90,5.0 100,5.5"
-            fill="none"
-            stroke="#0c4edcb8"
-            strokeWidth="1.0"
-            strokeLinecap="round"
-            variants={{
-              hidden: { pathLength: 0 },
-              visible: {
-                pathLength: 1,
-                transition: {
-                  duration: 0.42,
-                  delay,
-                  ease: [0.4, 0, 0.15, 1],
-                },
-              },
-            }}
-          />
-          <motion.path
-            d="M 100,8.0 C 82,7.8 62,8.4 42,7.9 C 22,7.4 10,6.8 0,7.5"
-            fill="none"
-            stroke="#2600ffff"
-            strokeWidth="0.9"
-            strokeLinecap="round"
-            opacity={0.8}
-            variants={{
-              hidden: { pathLength: 0 },
-              visible: {
-                pathLength: 1,
-                transition: {
-                  duration: 0.42,
-                  delay: delay + 0.42,
-                  ease: [0.4, 0, 0.15, 1],
-                },
-              },
-            }}
-          />
-          <motion.path
-            d="M 0,6.0 C 25,5.8 55,6.5 80,6.1 C 90,5.9 96,6.4 100,6.5"
-            fill="none"
-            stroke="rgba(77,77,255,0.45)"
-            strokeWidth="0.7"
-            strokeLinecap="round"
-            variants={{
-              hidden: { pathLength: 0 },
-              visible: {
-                pathLength: 1,
-                transition: {
-                  duration: 0.35,
-                  delay: delay + 0.84,
-                  ease: [0.4, 0, 0.2, 1],
-                },
-              },
-            }}
-          />
-        </motion.svg>
-      </span>
-    </span>
-  );
 }
 
 function TypingDots() {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.8 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       style={{
         display: "flex",
         gap: 5,
@@ -536,6 +393,8 @@ function TypingDots() {
         background: "#373739",
         borderRadius: "18px 18px 18px 4px",
         alignSelf: "flex-start",
+        minHeight: "34px",
+        boxSizing: "border-box",
       }}
     >
       {[0, 1, 2].map((i) => (
@@ -548,7 +407,11 @@ function TypingDots() {
             background: "rgba(255,255,255,0.55)",
             display: "inline-block",
           }}
-          animate={{ y: [0, -5, 0], opacity: [0.4, 1, 0.4] }}
+          animate={{
+            y: [0, -5, 0],
+            opacity: [0.4, 1, 0.4],
+            scale: [1, 1.1, 1],
+          }}
           transition={{
             duration: 0.75,
             repeat: Infinity,
@@ -557,31 +420,112 @@ function TypingDots() {
           }}
         />
       ))}
-    </div>
+    </motion.div>
   );
 }
+
+type BubblePhase = "waiting" | "typing_dots" | "revealing" | "done";
 
 function ChatBubble({
   text,
   triggerAt,
   isUser = false,
   onDone,
+  skipTypingDots = false,
 }: {
   text: string;
   triggerAt: number;
   isUser?: boolean;
   onDone?: () => void;
+  skipTypingDots?: boolean;
 }) {
-  const [started, setStarted] = useState(false);
-  const { displayed, done } = useTypewriter(text, 22, started);
+  const [phase, setPhase] = useState<BubblePhase>("waiting");
+  const phaseRef = useRef<BubblePhase>("waiting");
+  const onDoneCalledRef = useRef(false);
+  const triggerTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const dotsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
+
+  const setPhaseOnce = useCallback((next: BubblePhase) => {
+    const order: BubblePhase[] = [
+      "waiting",
+      "typing_dots",
+      "revealing",
+      "done",
+    ];
+    const currentIdx = order.indexOf(phaseRef.current);
+    const nextIdx = order.indexOf(next);
+    if (nextIdx <= currentIdx) return;
+    phaseRef.current = next;
+    setPhase(next);
+  }, []);
+
   useEffect(() => {
-    const t = setTimeout(() => setStarted(true), triggerAt);
-    return () => clearTimeout(t);
-  }, [triggerAt]);
+    if (phaseRef.current !== "waiting") return;
+    triggerTimeoutRef.current = setTimeout(() => {
+      if (isUser || skipTypingDots) {
+        setPhaseOnce("revealing");
+      } else {
+        setPhaseOnce("typing_dots");
+      }
+    }, triggerAt);
+    return () => {
+      if (triggerTimeoutRef.current) {
+        clearTimeout(triggerTimeoutRef.current);
+        triggerTimeoutRef.current = null;
+      }
+    };
+  }, [triggerAt, isUser, skipTypingDots, setPhaseOnce]);
+
   useEffect(() => {
-    if (done && onDone) onDone();
-  }, [done]);
-  if (!started) return null;
+    if (phase !== "typing_dots") return;
+    const dotsDuration = Math.min(800 + text.length * 15, 2000);
+    dotsTimeoutRef.current = setTimeout(() => {
+      setPhaseOnce("revealing");
+    }, dotsDuration);
+    return () => {
+      if (dotsTimeoutRef.current) {
+        clearTimeout(dotsTimeoutRef.current);
+        dotsTimeoutRef.current = null;
+      }
+    };
+  }, [phase, text.length, setPhaseOnce]);
+
+  const isRevealing = phase === "revealing" || phase === "done";
+  const { displayed, done: typewriterDone } = useTypewriter(
+    text,
+    22,
+    isRevealing,
+  );
+
+  useEffect(() => {
+    if (typewriterDone && phaseRef.current === "revealing") {
+      setPhaseOnce("done");
+    }
+  }, [typewriterDone, setPhaseOnce]);
+
+  useEffect(() => {
+    if (phase === "done" && !onDoneCalledRef.current) {
+      onDoneCalledRef.current = true;
+      onDoneRef.current?.();
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    return () => {
+      if (triggerTimeoutRef.current) clearTimeout(triggerTimeoutRef.current);
+      if (dotsTimeoutRef.current) clearTimeout(dotsTimeoutRef.current);
+    };
+  }, []);
+
+  if (phase === "waiting") return null;
+
+  if (phase === "typing_dots") {
+    return <TypingDots />;
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 14, scale: 0.93 }}
@@ -597,13 +541,14 @@ function ChatBubble({
         maxWidth: "90%",
         alignSelf: isUser ? "flex-end" : "flex-start",
         wordBreak: "break-word",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
       }}
     >
-      {displayed}
-      {!done && (
+      <span>{displayed}</span>
+      {phase === "revealing" && !typewriterDone && (
         <motion.span
-          animate={{ opacity: [1, 0] }}
-          transition={{ duration: 0.5, repeat: Infinity }}
+          animate={{ opacity: [1, 0.3, 1] }}
+          transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
           style={{
             display: "inline-block",
             width: 2,
@@ -625,33 +570,37 @@ const MSG1 = "Hey Auraa! Can you pull up my latest video project?";
 const MSG2 = "Of course! Here's your recent video edit ready for review.";
 
 function PhoneMockup() {
-  const [showTyping, setShowTyping] = useState(false);
   const [showMsg2, setShowMsg2] = useState(false);
   const [showImages, setShowImages] = useState(false);
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [message, setMessage] = useState("");
   const [sentMessages, setSentMessages] = useState<string[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const timeoutRefs = useRef<{ [key: string]: NodeJS.Timeout }>({});
 
-  const handleMsg1Done = () => {
-    setTimeout(() => setShowTyping(true), 300);
-    setTimeout(() => {
-      setShowTyping(false);
+  const msg2TriggeredRef = useRef(false);
+  const imagesTriggeredRef = useRef(false);
+
+  const handleMsg1Done = useCallback(() => {
+    if (msg2TriggeredRef.current) return;
+    msg2TriggeredRef.current = true;
+    timeoutRefs.current.msg2 = setTimeout(() => {
       setShowMsg2(true);
-    }, 2000);
-  };
-  const handleMsg2Done = () => setTimeout(() => setShowImages(true), 400);
+    }, 300);
+  }, []);
 
-  // Ensure video plays when shown
+  const handleMsg2Done = useCallback(() => {
+    if (imagesTriggeredRef.current) return;
+    imagesTriggeredRef.current = true;
+    timeoutRefs.current.images = setTimeout(() => setShowImages(true), 400);
+  }, []);
+
   useEffect(() => {
     if (showImages && videoRef.current) {
       const video = videoRef.current;
-      // Try to play video (browser may block autoplay)
       const playPromise = video.play();
       if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.log("Autoplay prevented, adding user interaction fallback");
-          // Add click listener to start video on first interaction
+        playPromise.catch(() => {
           const startVideoOnInteraction = () => {
             video.play().catch((e) => console.error("Video play failed:", e));
             document.removeEventListener("click", startVideoOnInteraction);
@@ -666,10 +615,26 @@ function PhoneMockup() {
 
   useEffect(() => {
     if (showImages) {
-      const t = setTimeout(() => setShowKeyboard(true), 600);
-      return () => clearTimeout(t);
+      timeoutRefs.current.keyboard = setTimeout(
+        () => setShowKeyboard(true),
+        600,
+      );
     }
+    return () => {
+      if (timeoutRefs.current.keyboard) {
+        clearTimeout(timeoutRefs.current.keyboard);
+      }
+    };
   }, [showImages]);
+
+  useEffect(() => {
+    return () => {
+      Object.values(timeoutRefs.current).forEach((timeout) => {
+        if (timeout) clearTimeout(timeout);
+      });
+    };
+  }, []);
+
   const handleSend = () => {
     if (!message.trim()) return;
     setSentMessages((p) => [...p, message]);
@@ -716,6 +681,7 @@ function PhoneMockup() {
               flexDirection: "column",
               gap: 14,
               overflowY: "auto",
+              overflowX: "hidden",
             }}
           >
             <ChatBubble
@@ -723,20 +689,11 @@ function PhoneMockup() {
               triggerAt={700}
               isUser={true}
               onDone={handleMsg1Done}
+              skipTypingDots={true}
             />
-            <AnimatePresence>
-              {showTyping && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <TypingDots />
-                </motion.div>
-              )}
-            </AnimatePresence>
             {showMsg2 && (
               <ChatBubble
+                key="msg2"
                 text={MSG2}
                 triggerAt={0}
                 isUser={false}
@@ -755,15 +712,19 @@ function PhoneMockup() {
                   playsInline
                   controls={false}
                   preload="auto"
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                   style={{
                     borderRadius: 14,
                     width: "100%",
                     aspectRatio: "16/9",
                     objectFit: "cover",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
                   }}
                   onError={(e) => {
                     console.error("Video failed to load:", e);
-                    // Fallback: try to reload video
                     const video = e.target as HTMLVideoElement;
                     setTimeout(() => {
                       video.load();
@@ -780,7 +741,11 @@ function PhoneMockup() {
                 key={i}
                 initial={{ opacity: 0, y: 6, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                transition={{
+                  duration: 0.3,
+                  ease: [0.22, 1, 0.36, 1],
+                  delay: i * 0.1,
+                }}
                 style={{
                   alignSelf: "flex-end",
                   background: "#4a4a4e",
@@ -792,6 +757,7 @@ function PhoneMockup() {
                   lineHeight: 1.5,
                   whiteSpace: "pre-wrap",
                   wordBreak: "break-word",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                 }}
               >
                 {msg}
@@ -818,43 +784,6 @@ function PhoneMockup() {
         </div>
       </div>
     </div>
-  );
-}
-
-function WordReveal({
-  text,
-  baseDelay = 0,
-}: {
-  text: string;
-  baseDelay?: number;
-}) {
-  return (
-    <span style={{ display: "inline" }}>
-      {text.split(" ").map((word, i, arr) => (
-        <motion.span
-          key={i}
-          style={{
-            display: "inline-block",
-            overflow: "hidden",
-            verticalAlign: "bottom",
-          }}
-        >
-          <motion.span
-            style={{ display: "inline-block" }}
-            initial={{ y: "105%", opacity: 0 }}
-            animate={{ y: "0%", opacity: 1 }}
-            transition={{
-              duration: 0.5,
-              delay: baseDelay + i * 0.08,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-          >
-            {word}
-            {i < arr.length - 1 ? "\u00A0" : ""}
-          </motion.span>
-        </motion.span>
-      ))}
-    </span>
   );
 }
 
@@ -946,7 +875,6 @@ function LiquidGlassBackground() {
     : isTablet
       ? "clamp(360px, 72vw, 880px)"
       : "clamp(480px, 60vw, 880px)";
-
   const glassBlobB = isMobile
     ? "clamp(200px, 85vw, 820px)"
     : isTablet
@@ -965,9 +893,6 @@ function LiquidGlassBackground() {
         zIndex: 0,
       }}
     >
-      {/* ══ AURORA BLOBS ══════════════════════════════════════════ */}
-
-      {/* Ultramarine — top-left anchor */}
       <motion.div
         animate={{
           x: [0, 60, -42, 24, 0],
@@ -1001,8 +926,6 @@ function LiquidGlassBackground() {
           willChange: "transform",
         }}
       />
-
-      {/* Electric blue — top-right */}
       <motion.div
         animate={{
           x: [0, -58, 40, -30, 0],
@@ -1036,8 +959,6 @@ function LiquidGlassBackground() {
           willChange: "transform",
         }}
       />
-
-      {/* Ocean deep — bottom-centre */}
       <motion.div
         animate={{
           x: [0, 44, -34, 20, 0],
@@ -1071,8 +992,6 @@ function LiquidGlassBackground() {
           willChange: "transform",
         }}
       />
-
-      {/* Royal navy pulse — centre-left */}
       <motion.div
         animate={{
           scale: [1, 1.24, 0.88, 1.1, 1],
@@ -1100,8 +1019,6 @@ function LiquidGlassBackground() {
           willChange: "transform, opacity",
         }}
       />
-
-      {/* Bright ice blue — top-right corner */}
       <motion.div
         animate={{
           x: [0, -26, 20, -12, 0],
@@ -1135,8 +1052,6 @@ function LiquidGlassBackground() {
           willChange: "transform",
         }}
       />
-
-      {/* Deep midnight — bottom-left */}
       <motion.div
         animate={{
           x: [0, 30, -22, 14, 0],
@@ -1170,8 +1085,6 @@ function LiquidGlassBackground() {
           willChange: "transform",
         }}
       />
-
-      {/* Cobalt mid-tone — centre filler */}
       <motion.div
         animate={{
           x: [0, -18, 28, -10, 0],
@@ -1206,7 +1119,6 @@ function LiquidGlassBackground() {
         }}
       />
 
-      {/* ══ ORBIT RINGS ══════════════════════════════════════════ */}
       <motion.div
         animate={{ rotate: [0, 360] }}
         transition={{ duration: 48, repeat: Infinity, ease: "linear" }}
@@ -1249,7 +1161,6 @@ function LiquidGlassBackground() {
         }}
       />
 
-      {/* ══ SPARKLES ═════════════════════════════════════════════ */}
       {SPARKLES.map((dot, i) => (
         <motion.div
           key={i}
@@ -1273,7 +1184,6 @@ function LiquidGlassBackground() {
         />
       ))}
 
-      {/* ══ GLASS BLOBS ══════════════════════════════════════════ */}
       <motion.div
         animate={{
           x: [0, 30, -20, 14, 0],
@@ -1302,12 +1212,8 @@ function LiquidGlassBackground() {
           background:
             "linear-gradient(148deg, rgba(59,130,246,0.06) 0%, rgba(14,51,134,0.03) 45%, rgba(18,10,143,0.05) 100%)",
           border: "1px solid rgba(59,130,246,0.14)",
-          boxShadow: [
-            "inset 0 1.5px 0 rgba(147,197,253,0.22)",
-            "inset 0 -1px 0 rgba(0,0,0,0.10)",
-            "inset 1px 0 0 rgba(59,130,246,0.08)",
-            "0 30px 100px rgba(0,0,0,0.45)",
-          ].join(", "),
+          boxShadow:
+            "inset 0 1.5px 0 rgba(147,197,253,0.22), inset 0 -1px 0 rgba(0,0,0,0.10), inset 1px 0 0 rgba(59,130,246,0.08), 0 30px 100px rgba(0,0,0,0.45)",
           willChange: "transform, border-radius",
         }}
       />
@@ -1339,16 +1245,12 @@ function LiquidGlassBackground() {
           background:
             "linear-gradient(322deg, rgba(37,99,235,0.055) 0%, rgba(14,51,134,0.018) 55%, rgba(0,65,106,0.04) 100%)",
           border: "1px solid rgba(37,99,235,0.10)",
-          boxShadow: [
-            "inset 0 1.5px 0 rgba(147,197,253,0.18)",
-            "inset 0 -1px 0 rgba(0,0,0,0.08)",
-            "0 25px 80px rgba(0,0,0,0.38)",
-          ].join(", "),
+          boxShadow:
+            "inset 0 1.5px 0 rgba(147,197,253,0.18), inset 0 -1px 0 rgba(0,0,0,0.08), 0 25px 80px rgba(0,0,0,0.38)",
           willChange: "transform, border-radius",
         }}
       />
 
-      {/* ══ GLASS SPHERES ════════════════════════════════════════ */}
       <motion.div
         animate={{ y: [0, -24, 0], x: [0, 11, 0] }}
         transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
@@ -1364,12 +1266,8 @@ function LiquidGlassBackground() {
           background:
             "radial-gradient(circle at 34% 28%, rgba(147,197,253,0.22) 0%, rgba(59,130,246,0.08) 36%, rgba(37,99,235,0.02) 64%, transparent 100%)",
           border: "1px solid rgba(147,197,253,0.26)",
-          boxShadow: [
-            "inset 0 3px 8px rgba(147,197,253,0.22)",
-            "inset 0 -2px 5px rgba(0,0,0,0.14)",
-            "0 18px 55px rgba(0,0,0,0.42)",
-            "0 0 110px rgba(37,99,235,0.22)",
-          ].join(", "),
+          boxShadow:
+            "inset 0 3px 8px rgba(147,197,253,0.22), inset 0 -2px 5px rgba(0,0,0,0.14), 0 18px 55px rgba(0,0,0,0.42), 0 0 110px rgba(37,99,235,0.22)",
         }}
       />
       <motion.div
@@ -1392,11 +1290,8 @@ function LiquidGlassBackground() {
           background:
             "radial-gradient(circle at 35% 30%, rgba(147,197,253,0.18) 0%, rgba(59,130,246,0.06) 44%, transparent 100%)",
           border: "1px solid rgba(147,197,253,0.20)",
-          boxShadow: [
-            "inset 0 2px 5px rgba(147,197,253,0.18)",
-            "0 10px 38px rgba(0,0,0,0.32)",
-            "0 0 65px rgba(14,51,134,0.20)",
-          ].join(", "),
+          boxShadow:
+            "inset 0 2px 5px rgba(147,197,253,0.18), 0 10px 38px rgba(0,0,0,0.32), 0 0 65px rgba(14,51,134,0.20)",
         }}
       />
       <motion.div
@@ -1419,15 +1314,11 @@ function LiquidGlassBackground() {
           background:
             "radial-gradient(circle at 36% 30%, rgba(147,197,253,0.20) 0%, rgba(59,130,246,0.06) 50%, transparent 100%)",
           border: "1px solid rgba(147,197,253,0.22)",
-          boxShadow: [
-            "inset 0 1.5px 4px rgba(147,197,253,0.20)",
-            "0 6px 24px rgba(0,0,0,0.30)",
-            "0 0 40px rgba(37,99,235,0.18)",
-          ].join(", "),
+          boxShadow:
+            "inset 0 1.5px 4px rgba(147,197,253,0.20), 0 6px 24px rgba(0,0,0,0.30), 0 0 40px rgba(37,99,235,0.18)",
         }}
       />
 
-      {/* ══ GLASS PILLS — tablet + desktop only ════════════════ */}
       {showPills && (
         <>
           <motion.div
@@ -1451,10 +1342,8 @@ function LiquidGlassBackground() {
               background:
                 "linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(14,51,134,0.04) 100%)",
               border: "1px solid rgba(147,197,253,0.16)",
-              boxShadow: [
-                "inset 0 1.5px 0 rgba(147,197,253,0.20)",
-                "0 8px 28px rgba(0,0,0,0.26)",
-              ].join(", "),
+              boxShadow:
+                "inset 0 1.5px 0 rgba(147,197,253,0.20), 0 8px 28px rgba(0,0,0,0.26)",
             }}
           />
           <motion.div
@@ -1485,7 +1374,6 @@ function LiquidGlassBackground() {
         </>
       )}
 
-      {/* ══ LIGHT STREAKS ════════════════════════════════════════ */}
       <motion.div
         animate={{ opacity: [0, 0.18, 0], scaleX: [0.45, 1.12, 0.45] }}
         transition={{
@@ -1549,7 +1437,6 @@ function LiquidGlassBackground() {
         }}
       />
 
-      {/* Film grain */}
       <div
         style={{
           position: "absolute",
@@ -1563,24 +1450,6 @@ function LiquidGlassBackground() {
         }}
       />
 
-      {/* ══════════════════════════════════════════════════════════
-          FULL BLACK BOTTOM GRADIENT
-          Three stacked layers so the transition to the next
-          black section is completely seamless on every viewport.
-
-          Layer A — solid black floor (0 → 12%)
-            Guarantees zero colour leakage at the very bottom edge.
-
-          Layer B — deep fade (0 → 55%)
-            Pulls the aurora colours down into pure black across
-            roughly the bottom half of the hero.
-
-          Layer C — wide atmospheric feather (0 → 75%)
-            Softens the mid-section so the transition looks natural
-            rather than abrupt, especially on tall desktop screens.
-         ══════════════════════════════════════════════════════════ */}
-
-      {/* Layer A — solid black floor */}
       <div
         style={{
           position: "absolute",
@@ -1593,15 +1462,12 @@ function LiquidGlassBackground() {
           zIndex: 4,
         }}
       />
-
-      {/* Layer B — deep fade to black */}
       <div
         style={{
           position: "absolute",
           bottom: 0,
           left: 0,
           right: 0,
-          /* Taller on mobile (fewer visual elements, needs more coverage) */
           height: isMobile ? "62%" : isTablet ? "58%" : "55%",
           background:
             "linear-gradient(to top, #000000 0%, #000000 10%, rgba(0,0,0,0.97) 22%, rgba(0,0,0,0.88) 36%, rgba(0,0,0,0.65) 55%, rgba(0,0,0,0.30) 75%, transparent 100%)",
@@ -1609,8 +1475,6 @@ function LiquidGlassBackground() {
           zIndex: 3,
         }}
       />
-
-      {/* Layer C — wide atmospheric feather */}
       <div
         style={{
           position: "absolute",
@@ -1624,8 +1488,6 @@ function LiquidGlassBackground() {
           zIndex: 2,
         }}
       />
-
-      {/* Side vignette */}
       <div
         style={{
           position: "absolute",
@@ -1639,6 +1501,124 @@ function LiquidGlassBackground() {
     </div>
   );
 }
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   ANIMATED HEADLINE SYSTEM (TYPEWRITER) — RESPONSIVE FIX
+   
+   Key changes for mobile/tablet:
+   1. Words use display:inline (not inline-block) so they wrap naturally
+   2. Underline uses position:relative layout to avoid clipping
+   3. Each character is display:inline so line breaks happen at word boundaries
+   4. Padding-bottom on underlined words prevents underline clipping
+────────────────────────────────────────────────────────────────────────────── */
+
+function TypewriterWord({
+  word,
+  charOffset,
+  typeSpeed,
+  hasUnderline = false,
+}: {
+  word: string;
+  charOffset: number;
+  typeSpeed: number;
+  hasUnderline?: boolean;
+}) {
+  const baseDelay = charOffset * typeSpeed;
+  const underlineDelay = baseDelay + word.length * typeSpeed + 0.15;
+
+  return (
+    <span
+      style={{
+        display: "inline",
+        position: "relative",
+        paddingBottom: hasUnderline ? "0.15em" : 0,
+      }}
+    >
+      {word.split("").map((char, i) => (
+        <motion.span
+          key={i}
+          style={{ display: "inline", visibility: "hidden" }}
+          initial={{ visibility: "hidden" as const }}
+          animate={{ visibility: "visible" as const }}
+          transition={{
+            duration: 0.01,
+            delay: baseDelay + i * typeSpeed,
+          }}
+        >
+          {char}
+        </motion.span>
+      ))}
+      {hasUnderline && (
+        <motion.span
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: "100%",
+            height: "clamp(2px, 0.15em, 3px)",
+            background:
+              "linear-gradient(90deg, rgba(59,130,246,0.9), rgba(6,182,212,0.9), rgba(59,130,246,0.9))",
+            borderRadius: 2,
+            transformOrigin: "left center",
+            pointerEvents: "none",
+          }}
+          initial={{ scaleX: 0, x: "-100%" }}
+          animate={{
+            scaleX: [0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1],
+            x: [
+              "-100%",
+              "0%",
+              "0%",
+              "100%",
+              "100%",
+              "0%",
+              "0%",
+              "-100%",
+              "-100%",
+              "0%",
+              "0%",
+            ],
+          }}
+          transition={{
+            duration: 3.6,
+            delay: underlineDelay,
+            ease: [0.22, 1, 0.36, 1],
+            times: [
+              0, 0.09, 0.18, 0.27, 0.36, 0.45, 0.55, 0.64, 0.73, 0.82, 1.0,
+            ],
+          }}
+        />
+      )}
+    </span>
+  );
+}
+
+const HEADLINE_DATA = [
+  { words: ["Your", "Creative", "Partner"], underlines: [] as string[] },
+  {
+    words: ["for", "Video", "&", "Storytelling,"],
+    underlines: ["Storytelling,"],
+  },
+  { words: ["Ready", "to", "Elevate"], underlines: ["Elevate"] },
+  { words: ["Your", "Project."], underlines: [] as string[] },
+];
+
+let _currentOffset = 0;
+const HEADLINE_WITH_OFFSETS = HEADLINE_DATA.map((line) => {
+  const mappedWords = line.words.map((word) => {
+    const offset = _currentOffset;
+    _currentOffset += word.length + 1;
+    return {
+      text: word,
+      offset,
+      hasUnderline: line.underlines.includes(word),
+    };
+  });
+  return { words: mappedWords };
+});
+
+const TYPE_SPEED = 0.04;
+const TOTAL_TYPE_TIME = _currentOffset * TYPE_SPEED;
 
 export default function CinematicHero({
   isBookingModalOpen,
@@ -1660,6 +1640,10 @@ export default function CinematicHero({
         "linear-gradient(to top, rgba(2,3,16,0.45) 0%, transparent 38%)",
       ].join(", ");
 
+  // Responsive line gaps
+  const lineGap = isMobile ? 4 : isTablet ? 6 : 12;
+  const lastLineGap = isMobile ? 2 : 4;
+
   return (
     <section
       style={{
@@ -1667,8 +1651,6 @@ export default function CinematicHero({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        /* Section base matches the solid black floor so there is
-           zero gap between hero bottom and the next section.      */
         background: "#000000",
         overflow: "hidden",
         padding: "0 clamp(24px,5vw,80px)",
@@ -1708,14 +1690,14 @@ export default function CinematicHero({
           zIndex: 2,
         }}
       >
-        {/* LEFT */}
+        {/* LEFT — Animated Headline */}
         <div
           style={{
             flex: 1,
             minWidth: 0,
             display: "flex",
             flexDirection: "column",
-            alignItems: "flex-start",
+            alignItems: isMobile ? "flex-start" : "flex-start",
           }}
         >
           <h1
@@ -1726,46 +1708,44 @@ export default function CinematicHero({
               color: "rgba(255,255,255,0.97)",
               letterSpacing: "-0.02em",
               margin: 0,
-              textShadow: [
-                "0 0 28px rgba(37,99,235,0.50)",
-                "0 0 65px rgba(59,130,246,0.28)",
-                "0 0 110px rgba(18,10,143,0.18)",
-                "0 2px 8px rgba(0,0,0,0.72)",
-              ].join(", "),
+              textShadow: "0 2px 8px rgba(0,0,0,0.55)",
+              width: "100%",
+              overflowWrap: "break-word",
+              wordBreak: "normal",
             }}
           >
-            <span style={{ display: "block" }}>
-              <WordReveal text="Your Creative Partner" baseDelay={0.1} />
-            </span>
-            <span style={{ display: "block", marginTop: 4 }}>
-              <WordReveal text="for" baseDelay={0.4} />
-              {"\u00A0"}
-              <BallpenHighlight delay={0.55}>
-                <span style={{ fontWeight: 800, letterSpacing: "-0.025em" }}>
-                  Video &amp; Storytelling,
-                </span>
-              </BallpenHighlight>
-            </span>
-            <span style={{ display: "block", marginTop: 12 }}>
-              <WordReveal text="Ready to Elevate" baseDelay={1.0} />
-            </span>
-            <span style={{ display: "block", marginTop: 4 }}>
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.28, duration: 0.01 }}
+            {HEADLINE_WITH_OFFSETS.map((line, lineIndex) => (
+              <span
+                key={lineIndex}
+                style={{
+                  display: "block",
+                  marginTop:
+                    lineIndex === 0
+                      ? 0
+                      : lineIndex === 3
+                        ? lastLineGap
+                        : lineGap,
+                }}
               >
-                <BallpenUnderline delay={1.3}>
-                  <WordReveal text="Your Project." baseDelay={1.12} />
-                </BallpenUnderline>
-              </motion.span>
-            </span>
+                {line.words.map((wordObj, wordIndex) => (
+                  <React.Fragment key={wordIndex}>
+                    <TypewriterWord
+                      word={wordObj.text}
+                      charOffset={wordObj.offset}
+                      typeSpeed={TYPE_SPEED}
+                      hasUnderline={wordObj.hasUnderline}
+                    />
+                    {wordIndex < line.words.length - 1 && " "}
+                  </React.Fragment>
+                ))}
+              </span>
+            ))}
           </h1>
 
           <motion.p
             style={{
-              marginTop: 28,
-              marginBottom: 36,
+              marginTop: isMobile ? 20 : 28,
+              marginBottom: isMobile ? 28 : 36,
               maxWidth: isMobile ? "100%" : 420,
               fontSize: "clamp(0.875rem,1.3vw,1rem)",
               fontWeight: 400,
@@ -1774,7 +1754,11 @@ export default function CinematicHero({
             }}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 2.1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{
+              duration: 0.6,
+              delay: TOTAL_TYPE_TIME + 0.2,
+              ease: [0.22, 1, 0.36, 1],
+            }}
           >
             <strong
               style={{ color: "rgba(255,255,255,0.94)", fontWeight: 600 }}
@@ -1797,7 +1781,7 @@ export default function CinematicHero({
             animate={{ opacity: 1, y: 0 }}
             transition={{
               duration: 0.55,
-              delay: 2.3,
+              delay: TOTAL_TYPE_TIME + 0.4,
               ease: [0.22, 1, 0.36, 1],
             }}
           >

@@ -628,7 +628,10 @@ export function VideoPopup({
             ref={videoRef}
             controls
             autoPlay
-            className="w-[80%] h-[80%] rounded-xl object-contain bg-black"
+            muted
+            playsInline
+            className="w-full h-full rounded-xl object-contain bg-black"
+            style={{ maxHeight: "100%", maxWidth: "100%" }}
           >
             <source src={project.videoUrl} type="video/mp4" />
             Your browser does not support the video tag.
@@ -638,9 +641,10 @@ export function VideoPopup({
           <iframe
             key={project.id}
             src={project.videoUrl}
-            className="w-[80%] h-[80%] rounded-xl object-contain"
+            className="w-full h-full rounded-xl object-contain"
             allow="autoplay; fullscreen"
             allowFullScreen
+            style={{ maxHeight: "100%", maxWidth: "100%" }}
           />
         )}
         {/* Close */}
@@ -648,22 +652,33 @@ export function VideoPopup({
           onClick={onClose}
           style={{
             position: "absolute",
-            top: 10,
-            right: 10,
+            top: 16,
+            right: 16,
             zIndex: 50,
-            background: "rgba(255,255,255,0.08)",
-            backdropFilter: "blur(8px)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            color: "rgba(255,255,255,0.7)",
-            padding: "5px 14px",
-            borderRadius: 6,
-            fontSize: 11,
-            letterSpacing: "0.15em",
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            background: "rgba(0,0,0,0.8)",
+            border: "1px solid rgba(255,255,255,0.3)",
+            color: "rgba(255,255,255,0.9)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             cursor: "pointer",
             transition: "all 0.2s",
           }}
         >
-          ✕ CLOSE
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M18 6l-12 12" />
+            <path d="M6 6l12 12" />
+          </svg>
         </button>
 
         {/* Prev */}
@@ -1069,7 +1084,7 @@ export default function PortfolioCards() {
         <section>
           <div className="border-t border-white/10 pt-16 mb-6">
             <SectionHeader
-              title="Horizontal Thumbnails"
+              title="Horizontal & Vertical Thumbnails"
               count={horizontalProjects.length}
             />
           </div>

@@ -410,12 +410,14 @@ const ThirdWorkSection = () => {
                 autoPlay
                 controls
                 playsInline
+                muted
                 className="w-full h-full object-contain bg-black"
+                style={{ maxHeight: "100%", maxWidth: "100%" }}
               />
 
               <button
                 onClick={() => setActiveProject(null)}
-                className="absolute top-3 right-3 md:top-4 md:right-4 z-50 p-1.5 md:p-2 rounded-full bg-black/40 hover:bg-white/20 text-white/80 hover:text-white backdrop-blur-md transition-all border border-white/5"
+                className="absolute top-2 right-2 md:top-4 md:right-4 z-50 p-1.5 md:p-2 rounded-full bg-black/60 hover:bg-white/20 text-white/80 hover:text-white backdrop-blur-md transition-all border border-white/5"
               >
                 <X size={isMobile ? 16 : 20} />
               </button>

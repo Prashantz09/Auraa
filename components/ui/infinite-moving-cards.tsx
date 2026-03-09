@@ -13,54 +13,35 @@ export const InfiniteMovingCards = ({
   className,
   renderItem,
 }: {
-  items: {
-    image: string;
-    name: string;
-    review: string;
-    rating: number;
-  }[];
+  items: any[];
   direction?: "left" | "right";
   speed?: "fast" | "normal" | "slow";
   pauseOnHover?: boolean;
   className?: string;
-  renderItem?: (item: any) => React.ReactNode;
+  renderItem?: (item: any, idx?: number) => React.ReactNode;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLUListElement>(null);
   const [start, setStart] = useState(false);
 
   useEffect(() => {
-    // ── Reset: remove any previously cloned nodes before re-cloning ──────────
     if (!containerRef.current || !scrollerRef.current) return;
-
-    const scroller = scrollerRef.current;
-
-    // Remove clones from previous run (keep only original items)
-    const originals = Array.from(scroller.children).slice(0, items.length);
-    scroller.innerHTML = "";
-    originals.forEach((node) => scroller.appendChild(node));
-
-    // Re-query after reset
-    const scrollerContent = Array.from(scroller.children);
-    scrollerContent.forEach((item) => {
-      scroller.appendChild(item.cloneNode(true));
-    });
 
     // Direction
     containerRef.current.style.setProperty(
       "--animation-direction",
-      direction === "left" ? "forwards" : "reverse",
+      direction === "left" ? "forwards" : "reverse"
     );
 
     // Speed
     const durations = { fast: "20s", normal: "40s", slow: "80s" };
     containerRef.current.style.setProperty(
       "--animation-duration",
-      durations[speed],
+      durations[speed]
     );
 
     setStart(true);
-  }, [items, direction, speed]); // ← re-run whenever items change
+  }, [items, direction, speed]);
 
   return (
     <div
@@ -86,12 +67,11 @@ export const InfiniteMovingCards = ({
           pauseOnHover && "hover:[animation-play-state:paused]",
         )}
       >
-        {items.map((item, idx) => (
+        {[...items, ...items].map((item, idx) => (
           <li
             key={idx}
             className={cn(
-              "relative shrink-0 rounded-2xl overflow-hidden border border-zinc-200 mr-4",
-              "dark:border-zinc-700",
+              "relative shrink-0 rounded-2xl overflow-hidden mr-4",
             )}
           >
             {renderItem ? (
@@ -141,27 +121,13 @@ export const InfiniteMovingCardsVertical = ({
   const [start, setStart] = useState(false);
 
   useEffect(() => {
-    // ── Reset: remove any previously cloned nodes before re-cloning ──────────
     if (!containerRef.current || !scrollerRef.current) return;
-
-    const scroller = scrollerRef.current;
-
-    // Remove clones from previous run (keep only original items)
-    const originals = Array.from(scroller.children).slice(0, items.length);
-    scroller.innerHTML = "";
-    originals.forEach((node) => scroller.appendChild(node));
-
-    // Re-query after reset
-    const scrollerContent = Array.from(scroller.children);
-    scrollerContent.forEach((item) => {
-      scroller.appendChild(item.cloneNode(true));
-    });
 
     // Speed
     const durations = { fast: "20s", normal: "40s", slow: "80s" };
     containerRef.current.style.setProperty(
       "--animation-duration",
-      durations[speed],
+      durations[speed]
     );
 
     setStart(true);
@@ -187,12 +153,11 @@ export const InfiniteMovingCardsVertical = ({
           pauseOnHover && "hover:[animation-play-state:paused]",
         )}
       >
-        {items.map((item, idx) => (
+        {[...items, ...items].map((item, idx) => (
           <li
             key={idx}
             className={cn(
-              "relative shrink-0 rounded-2xl overflow-hidden border border-zinc-200 mb-4",
-              "dark:border-zinc-700",
+              "relative shrink-0 rounded-2xl overflow-hidden mb-4",
             )}
           >
             {renderItem ? (

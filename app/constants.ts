@@ -261,11 +261,16 @@ export const TEAM: TeamMember[] = [
   {
     name: "Radha",
     role: "Media Manager",
-    image: "/teams/Radha.png",
+    image: "/review_person_images/radha.png",
   },
   {
     name: "Samrat",
     role: "Web Developer",
-    image: "/teams/Samrat.png",
+    image: "/review_person_images/Samrat.jpg",
   },
+  // {
+  //   name: "Amit",
+  //   role: "Video Editor",
+  //   image: "/review_person_images/Bisha01.jpg",
+  // },
 ];

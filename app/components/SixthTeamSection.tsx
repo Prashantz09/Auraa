@@ -1,151 +1,62 @@
 "use client";
-
-import Section from "./internalComponents/Section";
-
-import { TEAM, TeamMember } from "../constants";
-
 import { motion } from "framer-motion";
-
+import { TEAM, TeamMember } from "../constants";
+import Section from "./internalComponents/Section";
 import Image from "next/image";
-
-import { useRef, useEffect, useState } from "react";
+import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
 
 const SixthTeamSection = () => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-
-    checkMobile();
-
-    window.addEventListener("resize", checkMobile);
-
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-
-    if (!el) return;
-
-    let animId: number;
-
-    let lastTime = performance.now();
-
-    const initPosition = () => {
-      if (isMobile) {
-        el.scrollLeft = el.scrollWidth / 2;
-      }
-    };
-
-    const timeout = setTimeout(initPosition, 300);
-
-    const step = (time: number) => {
-      const delta = time - lastTime;
-
-      lastTime = time;
-
-      if (isMobile) {
-        const speed = 0.03; // Increased speed for better visibility
-
-        el.scrollLeft -= delta * speed;
-
-        const half = el.scrollWidth / 2;
-
-        if (el.scrollLeft <= 0) {
-          el.scrollLeft = half;
-        } else if (el.scrollLeft >= half) {
-          el.scrollLeft = 0;
-        }
-      }
-
-      animId = requestAnimationFrame(step);
-    };
-
-    animId = requestAnimationFrame(step);
-
-    return () => {
-      clearTimeout(timeout);
-
-      cancelAnimationFrame(animId);
-    };
-  }, []);
-
   const renderCard = (
     member: TeamMember,
-
     index: number,
-
-    keyPrefix = "",
-
-    isDuplicate = false,
+    keyPrefix = ""
   ) => {
-    const isCenter = index === 2;
-
-    const isFlipped = index > 2;
-
     return (
-      <motion.div
+      <div
         key={`${keyPrefix}${index}`}
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 1,
-
-          ease: [0.22, 1, 0.36, 1],
-
-          delay: index * 0.08,
-        }}
-        className={`flex flex-col items-center flex-shrink-0 ${isCenter ? "lg:scale-105 lg:z-20" : "lg:scale-95 lg:z-10"} ${isDuplicate ? "lg:hidden" : ""}`}
+        className={`flex flex-col items-center flex-shrink-0 mx-2 lg:mx-4 transition-transform duration-500 ${member.role === "Founder" || member.name === "Prash"
+          ? "w-48 sm:w-56 lg:w-[280px] scale-105 z-10"
+          : "w-40 sm:w-48 lg:w-64"
+          }`}
       >
         <div
-          className={`relative overflow-hidden rounded-2xl md:rounded-3xl shadow-lg shadow-black/40 bg-neutral-900 ${isCenter ? "w-40 h-[260px] sm:w-44 sm:h-[300px] md:w-56 md:h-[380px] lg:w-72 lg:h-[480px]" : "w-32 h-[220px] sm:w-36 sm:h-[260px] md:w-48 md:h-[340px] lg:w-60 lg:h-[420px]"}`}
+          className={`relative overflow-hidden shadow-lg shadow-black/40 bg-neutral-900 ${member.role === "Founder" || member.name === "Prash"
+            ? "rounded-3xl w-48 h-[300px] sm:w-56 sm:h-[360px] lg:w-[280px] lg:h-[460px]"
+            : "rounded-2xl md:rounded-3xl w-40 h-[260px] sm:w-48 sm:h-[320px] lg:w-64 lg:h-[420px]"
+            }`}
         >
           <Image
             src={member.image}
             alt={member.name}
             fill
             unoptimized
-            priority={isCenter}
-            loading={isCenter ? "eager" : "lazy"}
-            sizes="(max-width: 640px) 160px,
-
-                   (max-width: 768px) 200px,
-
-                   (max-width: 1024px) 240px,
-
-                   288px"
-            className={`object-cover grayscale contrast-125 ${isFlipped ? "scale-x-[-1]" : ""}`}
+            priority
+            loading="eager"
+            sizes="(max-width: 640px) 160px, (max-width: 768px) 200px, 288px"
+            className={`object-cover grayscale contrast-125 ${member.name === "Radha" || member.name === "Samrat"
+              ? "scale-x-[-1]"
+              : ""
+              }`}
           />
-
           <div className="absolute inset-0 bg-black/30 pointer-events-none" />
         </div>
 
         <div className="mt-4 mb-2 flex flex-col items-center min-h-[48px]">
           <h3
-            className={`font-semibold text-center text-white truncate ${isCenter ? "text-sm sm:text-base md:text-lg lg:text-xl" : "text-xs sm:text-sm md:text-base"}`}
+            className="font-semibold text-center text-white text-sm sm:text-base lg:text-lg truncate"
           >
             {member.name}
           </h3>
-
-          <p className="mt-1.5 text-center text-white/60 text-xs sm:text-sm truncate">
+          <p className="mt-1.5 text-center text-white/60 text-xs sm:text-sm lg:text-base truncate">
             {member.role}
           </p>
         </div>
-      </motion.div>
+      </div>
     );
   };
 
   return (
-    // FIX 1: Added isolate + increased top padding so nothing bleeds in from above
-
     <Section className="relative isolate bg-[#050508] text-white pt-28 md:pt-36 pb-0 overflow-hidden">
-      {/* FIX 2: Explicit z-10 so the title/subtitle always sits above the card row */}
-
       <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col items-center px-6">
         <motion.h2
           initial={{ opacity: 0, y: 16 }}
@@ -169,17 +80,17 @@ const SixthTeamSection = () => {
         </motion.p>
       </div>
 
-      {/* FIX 3: Removed mb-16 from header — spacing is now controlled by mt-14
-
-          here on the row itself, cleanly separating header from cards */}
-
-      <div
-        ref={scrollRef}
-        className={`relative z-0 w-full flex items-end gap-6 md:gap-8 lg:gap-10 px-6 pb-6 mt-14 md:mt-16 lg:mt-20 ${isMobile ? "overflow-x-auto" : "overflow-x-visible"} lg:overflow-visible lg:justify-center lg:max-w-6xl lg:mx-auto scrollbar-hide`}
-      >
-        {TEAM.map((member, index) => renderCard(member, index, "a-", false))}
-
-        {TEAM.map((member, index) => renderCard(member, index, "b-", true))}
+      <div className="relative w-full mt-14 md:mt-16 lg:mt-20">
+        <div className="w-full relative flex items-center justify-center -mx-4 lg:-mx-8">
+          <InfiniteMovingCards
+            items={TEAM}
+            direction="left"
+            speed="fast"
+            pauseOnHover={false}
+            className="py-10"
+            renderItem={(member: TeamMember, idx?: number) => renderCard(member, idx ?? 0, "slider-")}
+          />
+        </div>
       </div>
 
       <footer className="w-full border-t border-white/10 mt-20 md:mt-24 pt-14 md:pt-16 px-6">
